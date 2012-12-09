@@ -12,12 +12,14 @@ public class MissingTests {
 
 	private List missingTests = new ArrayList();
 	private List extentions = new ArrayList();
+	private List filesToIgnore = new ArrayList();
 
-	public void find(String srcDir, String testDir, String extentions) {
+	public void find(String srcDir, String testDir, String ext, String ignore) {
 		sourceBaseDir = srcDir;
 		testBaseDir = testDir;
 		
-		processExtentions(extentions);
+		extentions = Arrays.asList(ext.split(","));
+		filesToIgnore = Arrays.asList(ignore.split(","));
 		
 		walk(sourceBaseDir);
 		printResults();
@@ -31,7 +33,9 @@ public class MissingTests {
 		if (list != null) {
 			for (File f : list) {
 				if (f.isDirectory()) {
-					walk(f.getAbsolutePath());
+					if(!isOnIgnoreList(f.getAbsolutePath().toString())) {
+						walk(f.getAbsolutePath());
+					}
 				} else {
 					if (!f.getName().toString().startsWith(".") && checkFileExtention(f.getName().toString())) {
 						checkForTest(f);
@@ -41,6 +45,20 @@ public class MissingTests {
 		} else {
 			System.out.println("No source files found");
 		}
+	}
+	
+	private boolean isOnIgnoreList(String fileName) {
+		boolean isOnIgnoreList = false;
+		
+		for (int i = 0; i < filesToIgnore.size(); i++) {
+			String file = (String) filesToIgnore.get(i);
+			if(fileName.contains(file)) {
+				System.out.println("file: " + file + " fileName: " + fileName);
+				isOnIgnoreList = true;
+			}
+		}
+		
+		return isOnIgnoreList;
 	}
 
 	private void checkForTest(File sourceFile) {
@@ -129,8 +147,8 @@ public class MissingTests {
 		return isCorrectExtention;
 	}
 	
-	private void processExtentions(String ext) {
-		extentions = Arrays.asList(ext.split(","));
+	private void processArgs(String ext, List list) {
+		list = Arrays.asList(ext.split(","));
 	}
 
 }
