@@ -25,7 +25,12 @@
     <mkdir dir="${dist}"/>
 
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/LmigHelper.jar" basedir="${build}"/>
+    <jar jarfile="${dist}/LmigUtil.jar" basedir="${build}">
+    	<manifest>
+	      <attribute name="Main-Class"
+	            value="lmig.util.LmigUtil"/>
+	    </manifest>
+	</jar>
   </target>
 
   <target name="clean" description="clean up" >
