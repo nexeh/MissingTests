@@ -1,6 +1,7 @@
 package lmig.util.missingtests;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,8 @@ public class MissingTests {
 	private List missingTests = new ArrayList();
 	private List extentions = new ArrayList();
 	private List filesToIgnore = new ArrayList();
+	
+	int sourceCount = 0;
 
 	public void find(String srcDir, String testDir, String ext, String ignore) {
 		sourceBaseDir = srcDir;
@@ -37,7 +40,8 @@ public class MissingTests {
 						walk(f.getAbsolutePath());
 					}
 				} else {
-					if (!f.getName().toString().startsWith(".") && checkFileExtention(f.getName().toString())) {
+					if (!f.getName().toString().startsWith(".") && !isOnIgnoreList(f.getName().toString()) && checkFileExtention(f.getName().toString())) {
+						sourceCount++;
 						checkForTest(f);
 					}
 				}
@@ -53,7 +57,7 @@ public class MissingTests {
 		for (int i = 0; i < filesToIgnore.size(); i++) {
 			String file = (String) filesToIgnore.get(i);
 			if(fileName.contains(file)) {
-				System.out.println("file: " + file + " fileName: " + fileName);
+				//System.out.println("IGNORE: file: " + file + " fileName: " + fileName);
 				isOnIgnoreList = true;
 			}
 		}
@@ -69,13 +73,13 @@ public class MissingTests {
 		String fileLocation = sourceFile.getAbsoluteFile().toString();
 		fileLocation = fileLocation.substring(sourceBaseDir.length());
 
-		// Store the file name that we are looking for
+
+		// Store the file name that we are looking for, without the extension
 		String fileName = sourceFile.getName();
-		fileLocation.substring(fileLocation.lastIndexOf("/"),fileLocation.length());
 		fileName = fileName.substring(0, fileName.lastIndexOf("."));
 
 		// Strip out the file name and add the testing root
-		fileLocation = fileLocation.substring(0, fileLocation.lastIndexOf("/"));
+		fileLocation = fileLocation.substring(0, fileLocation.lastIndexOf(System.getProperty("file.separator")));
 		fileLocation = testBaseDir + fileLocation;
 
 		// Open the folder the test should live in
@@ -125,7 +129,7 @@ public class MissingTests {
 	}
 
 	private void printResults() {
-		System.out.println(missingTests.size() + " tests missing");
+		System.out.println(missingTests.size() + " of " + sourceCount + " tests missing");
 		System.out.println("=============================");
 		for (int i = 0; i < missingTests.size(); i++) {
 			File missingTest = (File) missingTests.get(i);
@@ -143,7 +147,6 @@ public class MissingTests {
 				isCorrectExtention = true;
 			}
 		}
-		
 		return isCorrectExtention;
 	}
 	
