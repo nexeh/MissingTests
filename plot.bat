@@ -1,0 +1,1 @@
+java -jar dist\LmigUtil.jar plot plot.csv tests 100
